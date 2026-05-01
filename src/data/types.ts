@@ -117,6 +117,7 @@ export type GameAction =
   | { type: 'NEXT_YEAR' }
   | { type: 'TRIGGER_CRISIS'; payload: Crisis }
   | { type: 'TRIGGER_OPPORTUNITY'; payload: Opportunity }
+  | { type: 'APPLY_EFFECTS'; payload: { effects: Effect[]; isCrisis: boolean } }
   | { type: 'NEXT_ERA' }
   | { type: 'UNLOCK_ACHIEVEMENT'; payload: string }
   | { type: 'DISMISS_EVENT' }

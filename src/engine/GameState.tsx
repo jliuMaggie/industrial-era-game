@@ -69,11 +69,26 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         year: newYear,
         turn: newTurn,
-        era: shouldAdvanceEra ? state.era + 1 : state.era,
+        era: state.era,
         eraTransition: shouldAdvanceEra
           ? { fromEra: state.era, toEra: state.era + 1, stage: 0 }
           : state.eraTransition,
         lastAssetPeak: Math.max(state.lastAssetPeak, state.assets),
+      };
+    }
+
+    case 'APPLY_EFFECTS': {
+      const { effects } = action.payload;
+      let newAssets = state.assets;
+      let newPrestige = state.prestige;
+      effects.forEach((effect: { type: string; value: number }) => {
+        if (effect.type === 'asset') newAssets *= (1 + effect.value);
+        if (effect.type === 'prestige') newPrestige += effect.value;
+      });
+      return {
+        ...state,
+        assets: Math.round(newAssets),
+        prestige: Math.round(newPrestige),
       };
     }
 

@@ -41,7 +41,7 @@ export default function MainGame() {
     setAvailableInvestments(shuffled.slice(0, 3));
   }, [currentEraInvestments]);
 
-  const checkAchievements = useCallback(() => {
+  useEffect(() => {
     const checks = [
       { id: 'first_investment', condition: state.investments.length > 0 },
       { id: 'millionaire', condition: state.assets >= 1000000 },
@@ -81,7 +81,7 @@ export default function MainGame() {
         dispatch({ type: 'UNLOCK_ACHIEVEMENT', payload: 'phoenix' });
       }
     }
-  }, [state, comboCount, critCount, opportunityCount, survivedCrisis, hasBeenBankrupt, dispatch, currentEraInvestments]);
+  }, [state.investments, state.assets, state.era, state.prestige, state.ranking, state.turn, state.achievements, comboCount, critCount, opportunityCount, survivedCrisis, hasBeenBankrupt, dispatch, currentEraInvestments]);
 
   const handleInvest = useCallback((investment: Investment) => {
     if (state.assets < investment.cost) return;
@@ -109,9 +109,9 @@ export default function MainGame() {
 
   const handleNextYear = useCallback(() => {
     const { totalIncome } = processYearEndReturns(state.investments);
-
-    let newAssets = state.assets + totalIncome;
-    let newPrestige = state.prestige;
+    if (totalIncome !== 0) {
+      dispatch({ type: 'APPLY_EFFECTS', payload: { effects: [{ type: 'asset', value: totalIncome / state.assets, description: '年度投资回报' }], isCrisis: false } });
+    }
 
     const shouldTriggerCrisis = Math.random() < CRISIS_CHANCE;
     const shouldTriggerOpportunity = !shouldTriggerCrisis && Math.random() < OPPORTUNITY_CHANCE;
@@ -120,20 +120,12 @@ export default function MainGame() {
     if (shouldTriggerCrisis) {
       const crisis = getRandomCrisis(state.era);
       if (crisis) {
-        crisis.effects.forEach(effect => {
-          if (effect.type === 'asset') newAssets *= (1 + effect.value);
-          if (effect.type === 'prestige') newPrestige += effect.value;
-        });
         dispatch({ type: 'TRIGGER_CRISIS', payload: crisis });
-        if (newAssets > 0) setSurvivedCrisis(true);
+        setSurvivedCrisis(true);
       }
     } else if (shouldTriggerOpportunity) {
       const opportunity = getRandomOpportunity(state.era);
       if (opportunity) {
-        opportunity.effects.forEach(effect => {
-          if (effect.type === 'asset') newAssets *= (1 + effect.value);
-          if (effect.type === 'prestige') newPrestige += effect.value;
-        });
         dispatch({ type: 'TRIGGER_OPPORTUNITY', payload: opportunity });
         setOpportunityCount(prev => prev + 1);
       }
@@ -158,38 +150,24 @@ export default function MainGame() {
     dispatch({ type: 'UPDATE_AI', payload: updatedAIs });
 
     dispatch({ type: 'NEXT_YEAR' });
-
-    checkAchievements();
     refreshInvestments();
-  }, [state, dispatch, checkAchievements, refreshInvestments]);
+  }, [state, dispatch, refreshInvestments]);
 
   const handleEventAccept = useCallback(() => {
     if (state.currentEvent?.type === 'crisis') {
       const crisis = state.currentEvent.data as Crisis;
-      let newAssets = state.assets;
-      let newPrestige = state.prestige;
-      crisis.effects.forEach(effect => {
-        if (effect.type === 'asset') newAssets *= (1 + effect.value);
-        if (effect.type === 'prestige') newPrestige += effect.value;
-      });
-      dispatch({ type: 'DISMISS_EVENT' });
+      dispatch({ type: 'APPLY_EFFECTS', payload: { effects: crisis.effects, isCrisis: true } });
     } else if (state.currentEvent?.type === 'opportunity') {
       const opportunity = state.currentEvent.data as Opportunity;
-      let newAssets = state.assets;
-      let newPrestige = state.prestige;
-      opportunity.effects.forEach(effect => {
-        if (effect.type === 'asset') newAssets *= (1 + effect.value);
-        if (effect.type === 'prestige') newPrestige += effect.value;
-      });
-      dispatch({ type: 'DISMISS_EVENT' });
+      dispatch({ type: 'APPLY_EFFECTS', payload: { effects: opportunity.effects, isCrisis: false } });
     }
+    dispatch({ type: 'DISMISS_EVENT' });
   }, [state, dispatch]);
 
   const handleEraTransitionComplete = useCallback(() => {
     dispatch({ type: 'DISMISS_ERA_TRANSITION' });
     dispatch({ type: 'NEXT_ERA' });
-    checkAchievements();
-  }, [dispatch, checkAchievements]);
+  }, [dispatch]);
 
   const eraYearRange = ERA_YEARS[state.era - 1];
   const eraProgress = state.year - eraYearRange.start;
