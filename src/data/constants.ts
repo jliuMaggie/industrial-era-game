@@ -2,7 +2,7 @@ export const INITIAL_ASSETS = 100000;
 export const INITIAL_PRESTIGE = 50;
 export const START_YEAR = 1830;
 export const ERA_LENGTH = 20;
-export const TURNS_PER_ERA = 20;
+export const TURNS_PER_ERA = 10;
 export const MAX_ERAS = 4;
 
 export const ERA_NAMES = [

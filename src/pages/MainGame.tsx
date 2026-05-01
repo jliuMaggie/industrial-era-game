@@ -7,7 +7,7 @@ import { simulateAITurn } from '../engine/AISystem';
 import { getInvestmentsByEra, getLegendaryInvestments } from '../data/investments';
 import { getRandomCrisis } from '../data/crises';
 import { getRandomOpportunity } from '../data/opportunities';
-import { ERA_NAMES, ERA_YEARS, CRISIS_CHANCE, OPPORTUNITY_CHANCE, LEGENDARY_CHANCE, INITIAL_ASSETS, COMBO_THRESHOLD } from '../data/constants';
+import { ERA_NAMES, ERA_YEARS, INITIAL_ASSETS, COMBO_THRESHOLD } from '../data/constants';
 import InvestmentCard from '../components/InvestmentCard';
 import RankingPanel from '../components/RankingPanel';
 import HeirBar from '../components/HeirBar';
@@ -113,9 +113,9 @@ export default function MainGame() {
       dispatch({ type: 'APPLY_EFFECTS', payload: { effects: [{ type: 'asset', value: totalIncome / state.assets, description: '年度投资回报' }], isCrisis: false } });
     }
 
-    const shouldTriggerCrisis = Math.random() < CRISIS_CHANCE;
-    const shouldTriggerOpportunity = !shouldTriggerCrisis && Math.random() < OPPORTUNITY_CHANCE;
-    const shouldTriggerLegendary = Math.random() < LEGENDARY_CHANCE;
+    const shouldTriggerCrisis = Math.random() < 0.40;
+    const shouldTriggerOpportunity = !shouldTriggerCrisis && Math.random() < 0.50;
+    const shouldTriggerLegendary = !shouldTriggerCrisis && !shouldTriggerOpportunity && Math.random() < 0.10;
 
     if (shouldTriggerCrisis) {
       const crisis = getRandomCrisis(state.era);
