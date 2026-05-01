@@ -1,177 +1,333 @@
 import type { Investment } from './types';
 
 export const INVESTMENTS: Investment[] = [
-  // Era 1: 蒸汽黎明 (1830-1869)
+  // Era 1 - Steam & Textile
   {
-    id: 'textile_mill_1', name: '手摇纺织机', description: '基础纺织设备，成本低廉', cost: 5000,
-    returnRate: 0.08, riskLevel: 1, category: '纺织', era: 1, level: 1, icon: '🧵',
-    flavorText: '珍妮纺纱机的轰鸣，开启了工业化的序章。'
+    id: 'textile_workshop',
+    name: '纺织作坊',
+    description: '从珍妮纺纱机开始的纺织革命，雇佣工人操作简单机械。',
+    type: 'industry',
+    rarity: 'common',
+    era: 1,
+    icon: '🏭',
+    riskStars: 1,
+    levels: [
+      { level: 1, name: '家庭作坊', returnRate: 0.08, critRate: 0.05, failRate: 0.05, minInvest: 100, maxInvest: 500, critMultiplierMin: 1.5, critMultiplierMax: 2.0, description: '小型家庭作坊' },
+      { level: 2, name: '手工工场', returnRate: 0.10, critRate: 0.06, failRate: 0.05, minInvest: 500, maxInvest: 2000, critMultiplierMin: 1.8, critMultiplierMax: 2.5, description: '雇佣多名工人' },
+      { level: 3, name: '中型工厂', returnRate: 0.12, critRate: 0.07, failRate: 0.04, minInvest: 2000, maxInvest: 8000, critMultiplierMin: 2.0, critMultiplierMax: 3.0, description: '水力驱动的纺织厂' },
+      { level: 4, name: '大型纺织厂', returnRate: 0.15, critRate: 0.08, failRate: 0.04, minInvest: 8000, maxInvest: 30000, critMultiplierMin: 2.5, critMultiplierMax: 3.5, description: '蒸汽动力全面应用' },
+      { level: 5, name: '纺织集团', returnRate: 0.18, critRate: 0.10, failRate: 0.03, minInvest: 30000, maxInvest: 100000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '垄断区域市场' },
+      { level: 6, name: '纺织帝国', returnRate: 0.22, critRate: 0.12, failRate: 0.03, minInvest: 100000, maxInvest: 500000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '跨国纺织贸易网络' },
+      { level: 7, name: '全球纺织王朝', returnRate: 0.28, critRate: 0.15, failRate: 0.02, minInvest: 500000, maxInvest: 2000000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '统治全球纺织品贸易' },
+    ],
   },
   {
-    id: 'textile_mill_2', name: '水力纺织厂', description: '利用水力驱动的大规模纺织厂', cost: 15000,
-    returnRate: 0.12, riskLevel: 2, category: '纺织', era: 1, level: 2, icon: '🏭',
-    flavorText: '河流的力量被 harness，生产效率翻倍。'
+    id: 'coal_mine',
+    name: '煤矿',
+    description: '黑色黄金驱动工业革命的脉搏，为蒸汽机提供源源不断的燃料。',
+    type: 'energy',
+    rarity: 'common',
+    era: 1,
+    icon: '⛏️',
+    riskStars: 2,
+    levels: [
+      { level: 1, name: '露天煤矿', returnRate: 0.10, critRate: 0.06, failRate: 0.08, minInvest: 200, maxInvest: 1000, critMultiplierMin: 1.8, critMultiplierMax: 2.5, description: '简易露天开采' },
+      { level: 2, name: '竖井矿场', returnRate: 0.12, critRate: 0.07, failRate: 0.07, minInvest: 1000, maxInvest: 5000, critMultiplierMin: 2.0, critMultiplierMax: 3.0, description: '深层地下开采' },
+      { level: 3, name: '矿区联合体', returnRate: 0.14, critRate: 0.08, failRate: 0.06, minInvest: 5000, maxInvest: 20000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '多矿联合运营' },
+      { level: 4, name: '煤炭集团', returnRate: 0.17, critRate: 0.09, failRate: 0.05, minInvest: 20000, maxInvest: 80000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '区域煤炭垄断' },
+      { level: 5, name: '能源大亨', returnRate: 0.20, critRate: 0.11, failRate: 0.05, minInvest: 80000, maxInvest: 300000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '控制能源供应链' },
+      { level: 6, name: '煤炭帝国', returnRate: 0.25, critRate: 0.13, failRate: 0.04, minInvest: 300000, maxInvest: 1000000, critMultiplierMin: 3.5, critMultiplierMax: 5.5, description: '国家能源支柱' },
+      { level: 7, name: '黑金王朝', returnRate: 0.30, critRate: 0.16, failRate: 0.03, minInvest: 1000000, maxInvest: 5000000, critMultiplierMin: 4.0, critMultiplierMax: 7.0, description: '全球能源霸主' },
+    ],
   },
   {
-    id: 'coal_mine_1', name: '小型煤矿', description: '浅层煤矿开采', cost: 8000,
-    returnRate: 0.10, riskLevel: 3, category: '矿业', era: 1, level: 1, icon: '⛏️',
-    flavorText: '黑色的黄金，驱动着蒸汽机的脉搏。'
+    id: 'steam_engine',
+    name: '蒸汽机制造',
+    description: '瓦特改良的蒸汽机是工业革命的引擎，为工厂和火车提供动力。',
+    type: 'technology',
+    rarity: 'rare',
+    era: 1,
+    icon: '⚙️',
+    riskStars: 2,
+    levels: [
+      { level: 1, name: '修理作坊', returnRate: 0.12, critRate: 0.08, failRate: 0.08, minInvest: 500, maxInvest: 2000, critMultiplierMin: 2.0, critMultiplierMax: 3.0, description: '修理维护蒸汽机' },
+      { level: 2, name: '零件制造', returnRate: 0.15, critRate: 0.09, failRate: 0.07, minInvest: 2000, maxInvest: 10000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '生产蒸汽机零件' },
+      { level: 3, name: '整机工厂', returnRate: 0.18, critRate: 0.10, failRate: 0.06, minInvest: 10000, maxInvest: 50000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '组装整机蒸汽机' },
+      { level: 4, name: '机械集团', returnRate: 0.22, critRate: 0.12, failRate: 0.06, minInvest: 50000, maxInvest: 200000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '多元化机械制造' },
+      { level: 5, name: '工业巨擘', returnRate: 0.26, critRate: 0.14, failRate: 0.05, minInvest: 200000, maxInvest: 800000, critMultiplierMin: 3.5, critMultiplierMax: 5.5, description: '引领工业标准' },
+      { level: 6, name: '机械帝国', returnRate: 0.30, critRate: 0.16, failRate: 0.04, minInvest: 800000, maxInvest: 3000000, critMultiplierMin: 4.0, critMultiplierMax: 6.5, description: '全球机械制造网络' },
+      { level: 7, name: '动力王朝', returnRate: 0.35, critRate: 0.20, failRate: 0.03, minInvest: 3000000, maxInvest: 10000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '定义工业动力标准' },
+    ],
   },
   {
-    id: 'coal_mine_2', name: '深层矿井', description: '深部煤层开采，产量更高', cost: 25000,
-    returnRate: 0.15, riskLevel: 4, category: '矿业', era: 1, level: 2, icon: '⚒️',
-    flavorText: '深入地底三百米，每一车煤都是财富与危险的赌注。'
+    id: 'railway',
+    name: '铁路特许经营权',
+    description: '钢铁巨龙连接城市与港口，运输效率的革命性提升。',
+    type: 'logistics',
+    rarity: 'epic',
+    era: 1,
+    icon: '🚂',
+    riskStars: 3,
+    levels: [
+      { level: 1, name: '短途货运', returnRate: 0.15, critRate: 0.10, failRate: 0.10, minInvest: 1000, maxInvest: 5000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '本地货运线路' },
+      { level: 2, name: '区域铁路', returnRate: 0.20, critRate: 0.12, failRate: 0.09, minInvest: 5000, maxInvest: 25000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '连接周边城市' },
+      { level: 3, name: '干线铁路', returnRate: 0.25, critRate: 0.14, failRate: 0.08, minInvest: 25000, maxInvest: 120000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '国家主要干线' },
+      { level: 4, name: '铁路公司', returnRate: 0.30, critRate: 0.16, failRate: 0.07, minInvest: 120000, maxInvest: 500000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '综合铁路运营商' },
+      { level: 5, name: '运输巨头', returnRate: 0.35, critRate: 0.18, failRate: 0.06, minInvest: 500000, maxInvest: 2000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '控制国家运输网' },
+      { level: 6, name: '铁路大王', returnRate: 0.40, critRate: 0.20, failRate: 0.05, minInvest: 2000000, maxInvest: 8000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '跨大陆铁路网络' },
+      { level: 7, name: '铁轨帝国', returnRate: 0.50, critRate: 0.25, failRate: 0.04, minInvest: 8000000, maxInvest: 50000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '全球铁路运输霸主' },
+    ],
+  },
+  // Era 2 - Steel & Electricity
+  {
+    id: 'steel_mill',
+    name: '钢铁厂',
+    description: '贝塞麦转炉炼钢法大幅降低钢铁成本，基建时代的基础材料。',
+    type: 'industry',
+    rarity: 'common',
+    era: 2,
+    icon: '🏗️',
+    riskStars: 2,
+    levels: [
+      { level: 1, name: '小型炼钢炉', returnRate: 0.12, critRate: 0.07, failRate: 0.07, minInvest: 1000, maxInvest: 5000, critMultiplierMin: 2.0, critMultiplierMax: 3.0, description: '简易炼钢设备' },
+      { level: 2, name: '转炉工厂', returnRate: 0.15, critRate: 0.08, failRate: 0.06, minInvest: 5000, maxInvest: 25000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '贝塞麦转炉' },
+      { level: 3, name: '钢铁联合体', returnRate: 0.18, critRate: 0.10, failRate: 0.06, minInvest: 25000, maxInvest: 100000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '炼钢轧钢一体化' },
+      { level: 4, name: '钢铁集团', returnRate: 0.22, critRate: 0.12, failRate: 0.05, minInvest: 100000, maxInvest: 400000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '区域钢铁龙头' },
+      { level: 5, name: '钢铁大亨', returnRate: 0.26, critRate: 0.14, failRate: 0.04, minInvest: 400000, maxInvest: 1500000, critMultiplierMin: 3.5, critMultiplierMax: 5.5, description: '国家基建支柱' },
+      { level: 6, name: '钢铁帝国', returnRate: 0.30, critRate: 0.16, failRate: 0.04, minInvest: 1500000, maxInvest: 6000000, critMultiplierMin: 4.0, critMultiplierMax: 6.5, description: '全球钢铁供应网' },
+      { level: 7, name: '钢铁王朝', returnRate: 0.38, critRate: 0.20, failRate: 0.03, minInvest: 6000000, maxInvest: 30000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '钢铁界无可争议的王者' },
+    ],
   },
   {
-    id: 'railway_1', name: '短途铁路', description: '连接矿区与工厂的早期铁路', cost: 30000,
-    returnRate: 0.14, riskLevel: 3, category: '铁路', era: 1, level: 1, icon: '🚂',
-    flavorText: '两条铁轨铺向远方，货物与时代一同加速。'
+    id: 'electric_power',
+    name: '发电厂',
+    description: '电力的时代降临，点亮城市并驱动新式工业设备。',
+    type: 'energy',
+    rarity: 'rare',
+    era: 2,
+    icon: '⚡',
+    riskStars: 3,
+    levels: [
+      { level: 1, name: '小型发电站', returnRate: 0.15, critRate: 0.09, failRate: 0.09, minInvest: 2000, maxInvest: 10000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '本地供电' },
+      { level: 2, name: '城市电网', returnRate: 0.20, critRate: 0.11, failRate: 0.08, minInvest: 10000, maxInvest: 50000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '城市电力供应' },
+      { level: 3, name: '区域电力', returnRate: 0.24, critRate: 0.13, failRate: 0.07, minInvest: 50000, maxInvest: 250000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '跨区域输电' },
+      { level: 4, name: '电力集团', returnRate: 0.28, critRate: 0.15, failRate: 0.06, minInvest: 250000, maxInvest: 1000000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '全国电力网络' },
+      { level: 5, name: '电力巨头', returnRate: 0.33, critRate: 0.17, failRate: 0.05, minInvest: 1000000, maxInvest: 4000000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '垄断电力市场' },
+      { level: 6, name: '能源帝国', returnRate: 0.38, critRate: 0.20, failRate: 0.04, minInvest: 4000000, maxInvest: 15000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '跨国能源集团' },
+      { level: 7, name: '电力王朝', returnRate: 0.45, critRate: 0.24, failRate: 0.03, minInvest: 15000000, maxInvest: 80000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: '照亮世界的能源霸主' },
+    ],
   },
   {
-    id: 'railway_2', name: '城际干线', description: '连接主要城市的重要铁路线', cost: 60000,
-    returnRate: 0.18, riskLevel: 4, category: '铁路', era: 1, level: 2, icon: '🛤️',
-    flavorText: '汽笛声响彻平原，城市与城市被钢铁血管连接。'
+    id: 'automobile',
+    name: '汽车制造',
+    description: '流水线生产让汽车走进千家万户，改变人类出行方式。',
+    type: 'technology',
+    rarity: 'epic',
+    era: 2,
+    icon: '🚗',
+    riskStars: 3,
+    levels: [
+      { level: 1, name: '汽车修理厂', returnRate: 0.18, critRate: 0.11, failRate: 0.10, minInvest: 3000, maxInvest: 15000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '修理进口汽车' },
+      { level: 2, name: '装配车间', returnRate: 0.22, critRate: 0.13, failRate: 0.09, minInvest: 15000, maxInvest: 80000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '组装汽车零件' },
+      { level: 3, name: '汽车工厂', returnRate: 0.28, critRate: 0.15, failRate: 0.08, minInvest: 80000, maxInvest: 400000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '整车生产制造' },
+      { level: 4, name: '汽车品牌', returnRate: 0.33, critRate: 0.17, failRate: 0.07, minInvest: 400000, maxInvest: 1800000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '知名品牌车企' },
+      { level: 5, name: '汽车集团', returnRate: 0.38, critRate: 0.20, failRate: 0.06, minInvest: 1800000, maxInvest: 8000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '多品牌汽车帝国' },
+      { level: 6, name: '汽车大亨', returnRate: 0.45, critRate: 0.22, failRate: 0.05, minInvest: 8000000, maxInvest: 30000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '改变世界的出行方式' },
+      { level: 7, name: '汽车王朝', returnRate: 0.55, critRate: 0.28, failRate: 0.04, minInvest: 30000000, maxInvest: 150000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '轮子上的帝国' },
+    ],
+  },
+  // Era 3 - Information & Electronics
+  {
+    id: 'semiconductor',
+    name: '半导体芯片',
+    description: '硅基革命的核心，微小芯片蕴含无限算力。',
+    type: 'technology',
+    rarity: 'rare',
+    era: 3,
+    icon: '💾',
+    riskStars: 3,
+    levels: [
+      { level: 1, name: '芯片实验室', returnRate: 0.18, critRate: 0.11, failRate: 0.10, minInvest: 5000, maxInvest: 25000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '晶体管研发' },
+      { level: 2, name: '晶圆厂', returnRate: 0.22, critRate: 0.13, failRate: 0.09, minInvest: 25000, maxInvest: 120000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '硅晶圆制造' },
+      { level: 3, name: '芯片工厂', returnRate: 0.26, critRate: 0.15, failRate: 0.08, minInvest: 120000, maxInvest: 600000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '集成电路量产' },
+      { level: 4, name: '芯片巨头', returnRate: 0.32, critRate: 0.17, failRate: 0.07, minInvest: 600000, maxInvest: 3000000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: 'CPU/GPU制造商' },
+      { level: 5, name: '科技巨头', returnRate: 0.38, critRate: 0.20, failRate: 0.06, minInvest: 3000000, maxInvest: 15000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '半导体产业链控制' },
+      { level: 6, name: '芯片帝国', returnRate: 0.44, critRate: 0.23, failRate: 0.05, minInvest: 15000000, maxInvest: 60000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '全球芯片供应链' },
+      { level: 7, name: '硅基王朝', returnRate: 0.52, critRate: 0.28, failRate: 0.04, minInvest: 60000000, maxInvest: 300000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '数字世界的基石' },
+    ],
   },
   {
-    id: 'iron_works_1', name: '小铁匠铺', description: '传统铁器加工', cost: 4000,
-    returnRate: 0.07, riskLevel: 1, category: '钢铁', era: 1, level: 1, icon: '🔨',
-    flavorText: '炉火映照着工匠的脸庞，铁锤敲打着工业化的基石。'
+    id: 'software',
+    name: '软件公司',
+    description: '代码构建的数字世界，从零边际成本创造无限价值。',
+    type: 'technology',
+    rarity: 'common',
+    era: 3,
+    icon: '💻',
+    riskStars: 2,
+    levels: [
+      { level: 1, name: '程序工作室', returnRate: 0.15, critRate: 0.09, failRate: 0.07, minInvest: 2000, maxInvest: 10000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '定制化软件开发' },
+      { level: 2, name: '软件公司', returnRate: 0.19, critRate: 0.11, failRate: 0.06, minInvest: 10000, maxInvest: 50000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '商业软件产品' },
+      { level: 3, name: '软件集团', returnRate: 0.24, critRate: 0.13, failRate: 0.06, minInvest: 50000, maxInvest: 250000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '多产品线运营' },
+      { level: 4, name: '操作系统', returnRate: 0.28, critRate: 0.15, failRate: 0.05, minInvest: 250000, maxInvest: 1200000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '平台级软件' },
+      { level: 5, name: '软件帝国', returnRate: 0.34, critRate: 0.18, failRate: 0.05, minInvest: 1200000, maxInvest: 6000000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '全球软件分发' },
+      { level: 6, name: '数字巨头', returnRate: 0.40, critRate: 0.21, failRate: 0.04, minInvest: 6000000, maxInvest: 25000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '软件生态系统' },
+      { level: 7, name: '代码王朝', returnRate: 0.48, critRate: 0.25, failRate: 0.03, minInvest: 25000000, maxInvest: 120000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: '代码统治世界' },
+    ],
   },
   {
-    id: 'iron_works_2', name: '炼铁高炉', description: '规模化生铁生产', cost: 20000,
-    returnRate: 0.13, riskLevel: 3, category: '钢铁', era: 1, level: 2, icon: '🏗️',
-    flavorText: '焦炭燃烧的温度足以熔化岩石，也足以熔化旧世界的秩序。'
+    id: 'telecom',
+    name: '电信网络',
+    description: '连接世界的通信基础设施，信息时代的神经网络。',
+    type: 'logistics',
+    rarity: 'epic',
+    era: 3,
+    icon: '📡',
+    riskStars: 3,
+    levels: [
+      { level: 1, name: '电话交换机', returnRate: 0.20, critRate: 0.12, failRate: 0.10, minInvest: 10000, maxInvest: 50000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '本地电话网络' },
+      { level: 2, name: '通信公司', returnRate: 0.25, critRate: 0.14, failRate: 0.09, minInvest: 50000, maxInvest: 250000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '长途电话服务' },
+      { level: 3, name: '网络运营商', returnRate: 0.30, critRate: 0.16, failRate: 0.08, minInvest: 250000, maxInvest: 1200000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '互联网接入服务' },
+      { level: 4, name: '电信集团', returnRate: 0.36, critRate: 0.19, failRate: 0.07, minInvest: 1200000, maxInvest: 6000000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '综合通信服务' },
+      { level: 5, name: '通信巨头', returnRate: 0.42, critRate: 0.22, failRate: 0.06, minInvest: 6000000, maxInvest: 30000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '全球通信网络' },
+      { level: 6, name: '连接帝国', returnRate: 0.48, critRate: 0.25, failRate: 0.05, minInvest: 30000000, maxInvest: 120000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '连接数十亿人' },
+      { level: 7, name: '通信王朝', returnRate: 0.58, critRate: 0.30, failRate: 0.04, minInvest: 120000000, maxInvest: 600000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '世界因你而连接' },
+    ],
+  },
+  // Era 4 - AI & Data
+  {
+    id: 'ai_company',
+    name: 'AI公司',
+    description: '人工智能正在重塑一切，从医疗诊断到自动驾驶。',
+    type: 'technology',
+    rarity: 'legendary',
+    era: 4,
+    icon: '🤖',
+    riskStars: 4,
+    levels: [
+      { level: 1, name: 'AI实验室', returnRate: 0.25, critRate: 0.15, failRate: 0.12, minInvest: 20000, maxInvest: 100000, critMultiplierMin: 3.0, critMultiplierMax: 5.0, description: '机器学习研究' },
+      { level: 2, name: 'AI应用公司', returnRate: 0.30, critRate: 0.17, failRate: 0.11, minInvest: 100000, maxInvest: 500000, critMultiplierMin: 3.5, critMultiplierMax: 5.5, description: 'AI产品落地' },
+      { level: 3, name: 'AI平台', returnRate: 0.36, critRate: 0.20, failRate: 0.10, minInvest: 500000, maxInvest: 2500000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: 'AI即服务' },
+      { level: 4, name: 'AI巨头', returnRate: 0.42, critRate: 0.23, failRate: 0.08, minInvest: 2500000, maxInvest: 15000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '大模型开发商' },
+      { level: 5, name: 'AI帝国', returnRate: 0.50, critRate: 0.27, failRate: 0.07, minInvest: 15000000, maxInvest: 80000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '通用人工智能' },
+      { level: 6, name: '智能霸主', returnRate: 0.58, critRate: 0.31, failRate: 0.06, minInvest: 80000000, maxInvest: 400000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: 'AI驱动一切' },
+      { level: 7, name: '智能王朝', returnRate: 0.70, critRate: 0.38, failRate: 0.05, minInvest: 400000000, maxInvest: 2000000000, critMultiplierMin: 6.5, critMultiplierMax: 12.0, description: '定义智能时代' },
+    ],
   },
   {
-    id: 'steam_ship_1', name: '蒸汽货船', description: '内河蒸汽运输船', cost: 35000,
-    returnRate: 0.16, riskLevel: 4, category: '航运', era: 1, level: 1, icon: '⛴️',
-    flavorText: '不再依赖风向，人类第一次真正征服了河流与近海。'
+    id: 'cloud_platform',
+    name: '云计算平台',
+    description: '按需提供的计算能力，数字经济的底层基础设施。',
+    type: 'technology',
+    rarity: 'rare',
+    era: 4,
+    icon: '☁️',
+    riskStars: 2,
+    levels: [
+      { level: 1, name: '数据中心', returnRate: 0.20, critRate: 0.12, failRate: 0.08, minInvest: 15000, maxInvest: 80000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '服务器托管' },
+      { level: 2, name: '云服务', returnRate: 0.25, critRate: 0.14, failRate: 0.07, minInvest: 80000, maxInvest: 400000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: 'IaaS/PaaS服务' },
+      { level: 3, name: '云平台', returnRate: 0.30, critRate: 0.17, failRate: 0.07, minInvest: 400000, maxInvest: 2000000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '全栈云服务' },
+      { level: 4, name: '云巨头', returnRate: 0.35, critRate: 0.19, failRate: 0.06, minInvest: 2000000, maxInvest: 12000000, critMultiplierMin: 4.0, critMultiplierMax: 5.5, description: '全球云基础设施' },
+      { level: 5, name: '云帝国', returnRate: 0.42, critRate: 0.22, failRate: 0.05, minInvest: 12000000, maxInvest: 60000000, critMultiplierMin: 4.5, critMultiplierMax: 6.5, description: '多云生态控制' },
+      { level: 6, name: '云端霸主', returnRate: 0.48, critRate: 0.26, failRate: 0.04, minInvest: 60000000, maxInvest: 300000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '全球算力网络' },
+      { level: 7, name: '云王朝', returnRate: 0.56, critRate: 0.30, failRate: 0.03, minInvest: 300000000, maxInvest: 1500000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '算力即权力' },
+    ],
   },
   {
-    id: 'steam_ship_2', name: '远洋蒸汽轮', description: '跨洋蒸汽运输船队', cost: 70000,
-    returnRate: 0.20, riskLevel: 5, category: '航运', era: 1, level: 2, icon: '🚢',
-    flavorText: '烟囱喷吐着黑烟，把旧大陆的货物送往新大陆的港口。'
+    id: 'biotech',
+    name: '生物科技',
+    description: '基因编辑与合成生物学开启生命科学新纪元。',
+    type: 'technology',
+    rarity: 'epic',
+    era: 4,
+    icon: '🧬',
+    riskStars: 4,
+    levels: [
+      { level: 1, name: '生物实验室', returnRate: 0.22, critRate: 0.13, failRate: 0.11, minInvest: 20000, maxInvest: 100000, critMultiplierMin: 2.8, critMultiplierMax: 4.5, description: '基因研究' },
+      { level: 2, name: '制药公司', returnRate: 0.28, critRate: 0.16, failRate: 0.10, minInvest: 100000, maxInvest: 500000, critMultiplierMin: 3.2, critMultiplierMax: 5.0, description: '新药研发' },
+      { level: 3, name: '生技集团', returnRate: 0.34, critRate: 0.19, failRate: 0.09, minInvest: 500000, maxInvest: 3000000, critMultiplierMin: 3.8, critMultiplierMax: 5.5, description: '综合生物技术' },
+      { level: 4, name: '基因巨头', returnRate: 0.40, critRate: 0.22, failRate: 0.08, minInvest: 3000000, maxInvest: 18000000, critMultiplierMin: 4.2, critMultiplierMax: 6.5, description: '基因治疗先锋' },
+      { level: 5, name: '生技帝国', returnRate: 0.48, critRate: 0.26, failRate: 0.07, minInvest: 18000000, maxInvest: 100000000, critMultiplierMin: 5.0, critMultiplierMax: 7.5, description: '生命科技公司' },
+      { level: 6, name: '生命霸主', returnRate: 0.55, critRate: 0.30, failRate: 0.06, minInvest: 100000000, maxInvest: 500000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: '重写生命密码' },
+      { level: 7, name: '生命王朝', returnRate: 0.65, critRate: 0.35, failRate: 0.05, minInvest: 500000000, maxInvest: 2500000000, critMultiplierMin: 6.5, critMultiplierMax: 11.0, description: '掌控生命奥秘' },
+    ],
   },
-
-  // Era 2: 钢铁洪流 (1870-1909)
+  // Cross-era finance
   {
-    id: 'steel_mill_1', name: '贝塞麦转炉', description: '廉价钢生产技术', cost: 50000,
-    returnRate: 0.15, riskLevel: 3, category: '钢铁', era: 2, level: 1, icon: '🔩',
-    flavorText: '转炉倾倒的瞬间，液态钢水如金色瀑布，建筑时代的骨骼就此诞生。'
-  },
-  {
-    id: 'steel_mill_2', name: '大型钢铁联合企业', description: '从矿石到钢材的完整产业链', cost: 120000,
-    returnRate: 0.22, riskLevel: 4, category: '钢铁', era: 2, level: 2, icon: '🏭',
-    flavorText: '高炉林立，铁路蜿蜒，这是一座用钢铁铸造的城市。'
-  },
-  {
-    id: 'oil_well_1', name: '油井钻探', description: '早期石油开采', cost: 30000,
-    returnRate: 0.18, riskLevel: 4, category: '石油', era: 2, level: 1, icon: '🛢️',
-    flavorText: '德雷克井的喷油，宣告了石油世纪的到来。'
-  },
-  {
-    id: 'oil_refinery_1', name: '炼油厂', description: '原油精炼加工', cost: 60000,
-    returnRate: 0.20, riskLevel: 3, category: '石油', era: 2, level: 2, icon: '🏭',
-    flavorText: '黑色原油分馏成金色的煤油与汽油，照亮并驱动了整个世界。'
-  },
-  {
-    id: 'chemical_plant_1', name: '染料化工厂', description: '合成染料生产', cost: 25000,
-    returnRate: 0.14, riskLevel: 2, category: '化工', era: 2, level: 1, icon: '🧪',
-    flavorText: '苯胺紫的色彩，是化学家从煤焦油中提取出的彩虹。'
-  },
-  {
-    id: 'chemical_plant_2', name: '化肥工厂', description: '人工合成化肥', cost: 45000,
-    returnRate: 0.17, riskLevel: 3, category: '化工', era: 2, level: 2, icon: '⚗️',
-    flavorText: '哈伯-博施工艺把空气变成面包，养活了亿万人口。'
-  },
-  {
-    id: 'transatlantic_cable', name: '跨大西洋电报电缆', description: '洲际通信基础设施', cost: 80000,
-    returnRate: 0.19, riskLevel: 4, category: '通信', era: 2, level: 1, icon: '🔌',
-    flavorText: '电流穿越三千英里海底，将消息从伦敦传到纽约只需数分钟。'
+    id: 'local_bank',
+    name: '地方银行',
+    description: '稳健的金融基石，通过存贷利差获取稳定收益。',
+    type: 'finance',
+    rarity: 'common',
+    era: 1,
+    icon: '🏛️',
+    riskStars: 1,
+    levels: [
+      { level: 1, name: '钱庄', returnRate: 0.06, critRate: 0.04, failRate: 0.03, minInvest: 100, maxInvest: 1000, critMultiplierMin: 1.5, critMultiplierMax: 2.0, description: '传统钱庄业务' },
+      { level: 2, name: '地方银行', returnRate: 0.08, critRate: 0.05, failRate: 0.03, minInvest: 1000, maxInvest: 5000, critMultiplierMin: 1.8, critMultiplierMax: 2.5, description: '存贷业务' },
+      { level: 3, name: '区域银行', returnRate: 0.10, critRate: 0.06, failRate: 0.02, minInvest: 5000, maxInvest: 25000, critMultiplierMin: 2.0, critMultiplierMax: 3.0, description: '跨区域经营' },
+      { level: 4, name: '商业银行', returnRate: 0.12, critRate: 0.07, failRate: 0.02, minInvest: 25000, maxInvest: 150000, critMultiplierMin: 2.2, critMultiplierMax: 3.5, description: '全面金融服务' },
+      { level: 5, name: '银行集团', returnRate: 0.15, critRate: 0.08, failRate: 0.02, minInvest: 150000, maxInvest: 800000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '投行业务' },
+      { level: 6, name: '金融帝国', returnRate: 0.18, critRate: 0.10, failRate: 0.01, minInvest: 800000, maxInvest: 4000000, critMultiplierMin: 3.0, critMultiplierMax: 5.0, description: '全球金融网络' },
+      { level: 7, name: '金融王朝', returnRate: 0.22, critRate: 0.12, failRate: 0.01, minInvest: 4000000, maxInvest: 20000000, critMultiplierMin: 3.5, critMultiplierMax: 6.0, description: '资本之王' },
+    ],
   },
   {
-    id: 'armaments_1', name: '军工厂', description: '步枪与大炮制造', cost: 55000,
-    returnRate: 0.16, riskLevel: 5, category: '军工', era: 2, level: 1, icon: '⚔️',
-    flavorText: '克虏伯大炮的轰鸣，既带来战争，也带来了帝国的订单。'
-  },
-
-  // Era 3: 电气纪元 (1910-1969)
-  {
-    id: 'power_plant_1', name: '火力发电厂', description: '燃煤发电站', cost: 70000,
-    returnRate: 0.18, riskLevel: 3, category: '电力', era: 3, level: 1, icon: '⚡',
-    flavorText: '涡轮机旋转，发电机轰鸣，电流沿着铜线流入千家万户。'
-  },
-  {
-    id: 'power_plant_2', name: '水电站', description: '水力发电大坝', cost: 150000,
-    returnRate: 0.24, riskLevel: 4, category: '电力', era: 3, level: 2, icon: '💧',
-    flavorText: '胡佛大坝拦住了科罗拉多河，也拦住了半个美国的光明。'
-  },
-  {
-    id: 'auto_factory_1', name: '汽车装配线', description: '福特式流水线生产', cost: 100000,
-    returnRate: 0.20, riskLevel: 3, category: '汽车', era: 3, level: 1, icon: '🚗',
-    flavorText: 'T型车从传送带上源源不断地下线，工人买得起自己生产的产品。'
+    id: 'stock_trade',
+    name: '股票交易',
+    description: '资本市场的博弈，高风险高回报的投资艺术。',
+    type: 'finance',
+    rarity: 'rare',
+    era: 2,
+    icon: '📈',
+    riskStars: 4,
+    levels: [
+      { level: 1, name: '股票经纪', returnRate: 0.15, critRate: 0.10, failRate: 0.12, minInvest: 500, maxInvest: 5000, critMultiplierMin: 2.5, critMultiplierMax: 4.0, description: '代客买卖' },
+      { level: 2, name: '证券公司', returnRate: 0.20, critRate: 0.12, failRate: 0.11, minInvest: 5000, maxInvest: 30000, critMultiplierMin: 3.0, critMultiplierMax: 4.5, description: '自营交易' },
+      { level: 3, name: '投资机构', returnRate: 0.25, critRate: 0.14, failRate: 0.10, minInvest: 30000, maxInvest: 200000, critMultiplierMin: 3.5, critMultiplierMax: 5.0, description: '基金管理' },
+      { level: 4, name: '对冲基金', returnRate: 0.30, critRate: 0.17, failRate: 0.09, minInvest: 200000, maxInvest: 1500000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '量化交易' },
+      { level: 5, name: '资本大鳄', returnRate: 0.36, critRate: 0.20, failRate: 0.08, minInvest: 1500000, maxInvest: 10000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '市场操控者' },
+      { level: 6, name: '华尔街之王', returnRate: 0.42, critRate: 0.24, failRate: 0.07, minInvest: 10000000, maxInvest: 60000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '金融市场的神' },
+      { level: 7, name: '资本王朝', returnRate: 0.50, critRate: 0.28, failRate: 0.06, minInvest: 60000000, maxInvest: 400000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '资本统治一切' },
+    ],
   },
   {
-    id: 'auto_factory_2', name: '豪华汽车厂', description: '高端汽车品牌', cost: 180000,
-    returnRate: 0.26, riskLevel: 4, category: '汽车', era: 3, level: 2, icon: '🏎️',
-    flavorText: '凯迪拉克与劳斯莱斯，是速度时代最显赫的身份徽章。'
+    id: 'venture_capital',
+    name: '风险投资',
+    description: '以慧眼识珠的眼光投资下一个独角兽，高风险换取超额回报。',
+    type: 'finance',
+    rarity: 'epic',
+    era: 3,
+    icon: '🎯',
+    riskStars: 5,
+    levels: [
+      { level: 1, name: '天使投资', returnRate: 0.20, critRate: 0.12, failRate: 0.15, minInvest: 1000, maxInvest: 10000, critMultiplierMin: 3.0, critMultiplierMax: 5.0, description: '早期项目投资' },
+      { level: 2, name: '种子基金', returnRate: 0.28, critRate: 0.15, failRate: 0.13, minInvest: 10000, maxInvest: 80000, critMultiplierMin: 3.5, critMultiplierMax: 5.5, description: '多项目分散投资' },
+      { level: 3, name: '风投公司', returnRate: 0.35, critRate: 0.18, failRate: 0.12, minInvest: 80000, maxInvest: 600000, critMultiplierMin: 4.0, critMultiplierMax: 6.0, description: '专业VC机构' },
+      { level: 4, name: '风投巨头', returnRate: 0.42, critRate: 0.22, failRate: 0.10, minInvest: 600000, maxInvest: 5000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '独角兽猎手' },
+      { level: 5, name: '投资教父', returnRate: 0.50, critRate: 0.26, failRate: 0.09, minInvest: 5000000, maxInvest: 40000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '点石成金' },
+      { level: 6, name: '资本教父', returnRate: 0.58, critRate: 0.30, failRate: 0.08, minInvest: 40000000, maxInvest: 250000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: '投资界的传奇' },
+      { level: 7, name: '风投之神', returnRate: 0.68, critRate: 0.35, failRate: 0.07, minInvest: 250000000, maxInvest: 1500000000, critMultiplierMin: 6.5, critMultiplierMax: 11.0, description: '每笔投资都是神话' },
+    ],
   },
   {
-    id: 'airline_1', name: '航空公司', description: '商业航空运输', cost: 130000,
-    returnRate: 0.22, riskLevel: 5, category: '航空', era: 3, level: 1, icon: '✈️',
-    flavorText: '银色机翼划破云层，大洋两岸的距离缩短到一夜之遥。'
-  },
-  {
-    id: 'electronics_1', name: '电子管工厂', description: '收音机与早期电子设备', cost: 60000,
-    returnRate: 0.16, riskLevel: 2, category: '电子', era: 3, level: 1, icon: '📻',
-    flavorText: '电子管在黑暗中发出橘红色光芒，无线电波把世界连成一个剧场。'
-  },
-  {
-    id: 'electronics_2', name: '半导体实验室', description: '晶体管与集成电路', cost: 200000,
-    returnRate: 0.28, riskLevel: 4, category: '电子', era: 3, level: 2, icon: '💻',
-    flavorText: '硅片上蚀刻的微观电路，其复杂程度超越了人类历史上任何建筑。'
-  },
-
-  // Era 4: 数字时代 (1970-2025)
-  {
-    id: 'software_1', name: '软件公司', description: '操作系统与应用软件', cost: 150000,
-    returnRate: 0.25, riskLevel: 3, category: '计算机', era: 4, level: 1, icon: '💾',
-    flavorText: '二进制代码在磁介质上起舞，看不见的软件正在重塑可见的世界。'
-  },
-  {
-    id: 'software_2', name: '互联网巨头', description: '搜索引擎与社交平台', cost: 400000,
-    returnRate: 0.35, riskLevel: 5, category: '互联网', era: 4, level: 2, icon: '🌐',
-    flavorText: '点击与链接编织成全球神经网络，信息以光速传播，隐私成为商品。'
-  },
-  {
-    id: 'biotech_1', name: '生物技术公司', description: '基因工程与制药', cost: 250000,
-    returnRate: 0.22, riskLevel: 4, category: '生物', era: 4, level: 1, icon: '🧬',
-    flavorText: '人类第一次读出了生命的源代码，也第一次拥有了改写它的能力。'
-  },
-  {
-    id: 'biotech_2', name: '基因编辑实验室', description: 'CRISPR基因编辑技术', cost: 500000,
-    returnRate: 0.30, riskLevel: 5, category: '生物', era: 4, level: 2, icon: '🔬',
-    flavorText: '剪刀在DNA双螺旋上精确切割，治愈疾病与改造生命的界限变得模糊。'
-  },
-  {
-    id: 'ai_lab_1', name: '人工智能实验室', description: '机器学习与神经网络', cost: 350000,
-    returnRate: 0.28, riskLevel: 5, category: '人工智能', era: 4, level: 1, icon: '🤖',
-    flavorText: '硅基神经元在数据中心里编织思维，人类第一次造出了比自己更聪明的工具。'
-  },
-  {
-    id: 'space_company', name: '私人航天公司', description: '商业卫星与太空旅行', cost: 800000,
-    returnRate: 0.32, riskLevel: 6, category: '航天', era: 4, level: 1, icon: '🚀',
-    flavorText: '火箭回收着陆的一刻，人类通往多行星文明的门票开始打折出售。'
-  },
-  {
-    id: 'renewable_energy', name: '新能源集团', description: '太阳能与风力发电', cost: 300000,
-    returnRate: 0.24, riskLevel: 3, category: '新能源', era: 4, level: 1, icon: '🌱',
-    flavorText: '光伏板在阳光下沉默地工作，风车的叶片切割着大气与旧能源的霸权。'
-  },
-  {
-    id: 'quantum_computing', name: '量子计算中心', description: '量子比特超级计算机', cost: 1000000,
-    returnRate: 0.40, riskLevel: 6, category: '计算机', era: 4, level: 2, icon: '⚛️',
-    flavorText: '在接近绝对零度的极寒中，量子比特同时存在于0与1之间，算力超越了宇宙中所有原子的总和。'
+    id: 'crypto',
+    name: '加密货币',
+    description: '去中心化金融的终极赌注，万亿市值背后的疯狂与机遇。',
+    type: 'finance',
+    rarity: 'legendary',
+    era: 4,
+    icon: '₿',
+    riskStars: 5,
+    levels: [
+      { level: 1, name: '矿工', returnRate: 0.30, critRate: 0.18, failRate: 0.18, minInvest: 5000, maxInvest: 50000, critMultiplierMin: 3.5, critMultiplierMax: 6.0, description: '挖矿获取代币' },
+      { level: 2, name: '交易所', returnRate: 0.38, critRate: 0.21, failRate: 0.16, minInvest: 50000, maxInvest: 400000, critMultiplierMin: 4.0, critMultiplierMax: 6.5, description: '运营交易平台' },
+      { level: 3, name: 'DeFi协议', returnRate: 0.45, critRate: 0.25, failRate: 0.14, minInvest: 400000, maxInvest: 3000000, critMultiplierMin: 4.5, critMultiplierMax: 7.0, description: '去中心化金融' },
+      { level: 4, name: '公链', returnRate: 0.52, critRate: 0.28, failRate: 0.12, minInvest: 3000000, maxInvest: 25000000, critMultiplierMin: 5.0, critMultiplierMax: 8.0, description: '区块链基础设施' },
+      { level: 5, name: '加密巨头', returnRate: 0.60, critRate: 0.32, failRate: 0.10, minInvest: 25000000, maxInvest: 200000000, critMultiplierMin: 5.5, critMultiplierMax: 9.0, description: '加密生态帝国' },
+      { level: 6, name: '链上霸主', returnRate: 0.68, critRate: 0.36, failRate: 0.09, minInvest: 200000000, maxInvest: 1200000000, critMultiplierMin: 6.0, critMultiplierMax: 10.0, description: '定义Web3规则' },
+      { level: 7, name: '加密之神', returnRate: 0.80, critRate: 0.42, failRate: 0.08, minInvest: 1200000000, maxInvest: 8000000000, critMultiplierMin: 7.0, critMultiplierMax: 13.0, description: '数字黄金时代的缔造者' },
+    ],
   },
 ];
 
@@ -181,8 +337,4 @@ export function getInvestmentsByEra(era: number): Investment[] {
 
 export function getInvestmentById(id: string): Investment | undefined {
   return INVESTMENTS.find(inv => inv.id === id);
-}
-
-export function getLegendaryInvestments(era: number): Investment[] {
-  return INVESTMENTS.filter(inv => inv.era === era && inv.level >= 2 && inv.cost > inv.era * 100000);
 }

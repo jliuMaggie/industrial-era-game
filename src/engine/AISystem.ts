@@ -1,61 +1,92 @@
-import { getInvestmentsByEra } from '../data/investments';
-import type { AIFamily } from '../data/types';
+import type { AIFamilyState, Era } from '@/data/types';
+import { AI_FAMILIES } from '@/data/aiFamilies';
+import { INVESTMENTS } from '@/data/investments';
 
-export function simulateAITurn(aiFamilies: AIFamily[], era: number, _turn: number): AIFamily[] {
-  const availableInvestments = getInvestmentsByEra(era);
-  if (availableInvestments.length === 0) return aiFamilies;
+const STYLE_MULTIPLIERS: Record<string, { investRange: [number, number]; returnMult: number }> = {
+  aggressive: { investRange: [0.15, 0.35], returnMult: 1.3 },
+  balanced: { investRange: [0.08, 0.20], returnMult: 1.1 },
+  conservative: { investRange: [0.03, 0.12], returnMult: 0.9 },
+  opportunist: { investRange: [0.10, 0.30], returnMult: 1.5 },
+};
 
+export function simulateAIFamilies(
+  aiFamilies: AIFamilyState[],
+  currentEra: Era
+): AIFamilyState[] {
   return aiFamilies.map(ai => {
-    const strategy = ai.strategy;
-    let targetInvestments = [...ai.investments];
-    let assets = ai.currentAssets;
-    let prestige = ai.currentPrestige;
+    const config = AI_FAMILIES.find(a => a.id === ai.familyId);
+    if (!config) return ai;
 
-    const numInvestments = strategy === 'aggressive' ? 3 : strategy === 'conservative' ? 1 : 2;
-
-    for (let i = 0; i < numInvestments; i++) {
-      const affordable = availableInvestments.filter(inv => inv.cost <= assets * 0.3);
-      if (affordable.length === 0) break;
-
-      let chosen;
-      if (strategy === 'aggressive') {
-        chosen = affordable.reduce((a, b) => (a.returnRate > b.returnRate ? a : b));
-      } else if (strategy === 'conservative') {
-        chosen = affordable.reduce((a, b) => (a.riskLevel < b.riskLevel ? a : b));
-      } else if (strategy === 'opportunist') {
-        chosen = affordable[Math.floor(Math.random() * affordable.length)];
-      } else {
-        chosen = affordable.reduce((a, b) => (a.returnRate / a.riskLevel > b.returnRate / b.riskLevel ? a : b));
-      }
-
-      if (chosen && chosen.cost <= assets * 0.3) {
-        assets -= chosen.cost;
-        if (!targetInvestments.includes(chosen.id)) {
-          targetInvestments = [...targetInvestments, chosen.id];
-        }
-        prestige += 2;
-      }
+    const styleMult = STYLE_MULTIPLIERS[config.style] || STYLE_MULTIPLIERS.balanced;
+    
+    // Determine investment amount based on style and current asset
+    const investRatio = styleMult.investRange[0] + Math.random() * (styleMult.investRange[1] - styleMult.investRange[0]);
+    const investAmount = Math.floor(ai.asset * investRatio);
+    
+    // Find available investments for this era
+    const eraInvestments = INVESTMENTS.filter(inv => inv.era === currentEra);
+    if (eraInvestments.length === 0) return ai;
+    
+    // Pick a random investment
+    const chosenInvestment = eraInvestments[Math.floor(Math.random() * eraInvestments.length)];
+    const invLevel = chosenInvestment.levels[0];
+    
+    // Roll for outcome
+    const roll = Math.random();
+    let returnAmount: number;
+    let trend: 'up' | 'down' | 'stable';
+    
+    if (roll < invLevel.failRate) {
+      // Loss
+      const lossPercent = 0.2 + Math.random() * 0.3;
+      returnAmount = -Math.floor(investAmount * lossPercent);
+      trend = 'down';
+    } else if (roll < invLevel.failRate + invLevel.critRate) {
+      // Crit win
+      const critMult = invLevel.critMultiplierMin + Math.random() * (invLevel.critMultiplierMax - invLevel.critMultiplierMin);
+      returnAmount = Math.floor(investAmount * critMult * styleMult.returnMult);
+      trend = 'up';
+    } else {
+      // Normal
+      returnAmount = Math.floor(investAmount * (1 + invLevel.returnRate) * styleMult.returnMult);
+      trend = Math.random() > 0.5 ? 'up' : 'stable';
     }
-
-    const growthRate = strategy === 'aggressive' ? 0.15 : strategy === 'conservative' ? 0.08 : 0.12;
-    const randomFactor = 0.9 + Math.random() * 0.2;
-    assets = Math.max(1000, assets * (1 + growthRate * randomFactor));
-
+    
+    // Add random market fluctuation
+    const marketFluctuation = (Math.random() - 0.4) * 0.05 * ai.asset;
+    
+    const newAsset = Math.max(100, ai.asset + returnAmount + marketFluctuation);
+    
     return {
       ...ai,
-      currentAssets: Math.floor(assets),
-      currentPrestige: prestige,
-      investments: targetInvestments,
+      asset: Math.floor(newAsset),
+      trend,
     };
   });
 }
 
-export function calculateRanking(playerAssets: number, aiFamilies: AIFamily[]): number {
-  const allAssets = [
-    { id: 'player', assets: playerAssets },
-    ...aiFamilies.map(f => ({ id: f.id, assets: f.currentAssets })),
+export function updateRanking(
+  allFamilies: { id: string; asset: number }[]
+): string[] {
+  const sorted = [...allFamilies].sort((a, b) => b.asset - a.asset);
+  return sorted.map(f => f.id);
+}
+
+export function generateAILog(
+  _aiFamily: AIFamilyState,
+  currentEra: Era
+): string {
+  const eraInvestments = INVESTMENTS.filter(inv => inv.era === currentEra);
+  const investment = eraInvestments[Math.floor(Math.random() * eraInvestments.length)];
+  if (!investment) return '正在观望市场';
+  
+  const actions = [
+    `投资了 ${investment.name}`,
+    `增持了 ${investment.name} 的股份`,
+    `在 ${investment.name} 上获得了可观收益`,
+    `正在研究 ${investment.name} 的投资机会`,
+    `加大了对 ${investment.name} 的投入`,
   ];
-  allAssets.sort((a, b) => b.assets - a.assets);
-  const rank = allAssets.findIndex(a => a.id === 'player') + 1;
-  return rank;
+  
+  return actions[Math.floor(Math.random() * actions.length)];
 }

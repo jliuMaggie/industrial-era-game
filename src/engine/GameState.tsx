@@ -1,161 +1,226 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
-import type { GameState, GameAction } from '../data/types';
-import { INITIAL_ASSETS, INITIAL_PRESTIGE, START_YEAR, TURNS_PER_ERA, MAX_ERAS } from '../data/constants';
-import { AI_FAMILIES } from '../data/aiFamilies';
-import { ACHIEVEMENTS } from '../data/achievements';
-import { calculateRanking } from '../engine/AISystem';
+import { createContext, useContext, useReducer, type ReactNode } from 'react';
+import type { GameState, GameAction, AIFamilyState, FamilyState, Era } from '@/data/types';
+import { AI_FAMILIES } from '@/data/aiFamilies';
+import { ACHIEVEMENTS } from '@/data/achievements';
+import { START_YEAR_BY_ERA, INITIAL_ASSET, REPUTATION_START, MAX_TURNS_PER_ERA, VICTORY_ASSET_TARGET, GAME_OVER_ASSET_THRESHOLD } from '@/data/constants';
+import { simulateAIFamilies } from './AISystem';
 
-const initialState: GameState = {
-  year: START_YEAR,
-  era: 1,
-  familyName: '',
-  assets: INITIAL_ASSETS,
-  prestige: INITIAL_PRESTIGE,
-  investments: [],
-  ranking: 3,
-  history: [],
-  turn: 1,
-  aiFamilies: AI_FAMILIES.map(f => ({ ...f })),
-  achievements: ACHIEVEMENTS.map(a => ({ ...a })),
-  lastAssetPeak: INITIAL_ASSETS,
-  gameStarted: false,
-  currentEvent: null,
-  currentAchievement: null,
-  eraTransition: null,
-};
+function createInitialAIFamilies(): AIFamilyState[] {
+  return AI_FAMILIES.map(ai => ({
+    familyId: ai.id,
+    name: ai.name,
+    color: ai.color,
+    asset: ai.baseAsset,
+    reputation: 100,
+    trend: 'stable' as const,
+  }));
+}
+
+export function createInitialPlayer(familyName: string): FamilyState {
+  return {
+    id: 'player',
+    name: familyName,
+    asset: INITIAL_ASSET,
+    reputation: REPUTATION_START,
+    cashReserve: INITIAL_ASSET,
+    investments: [],
+    heir: null,
+    marriages: [],
+    critEnergy: 0,
+    comboCount: 0,
+  };
+}
+
+export function createInitialState(familyName: string): GameState {
+  const aiFamilies = createInitialAIFamilies();
+  return {
+    currentYear: START_YEAR_BY_ERA[1],
+    currentEra: 1 as Era,
+    turn: 1,
+    maxTurnsPerEra: MAX_TURNS_PER_ERA,
+    player: createInitialPlayer(familyName),
+    aiFamilies,
+    ranking: ['player', ...AI_FAMILIES.map(a => a.id)].sort(() => Math.random() - 0.5),
+    comboCount: 0,
+    critEnergy: 0,
+    gameOver: false,
+    victory: false,
+    activeCrises: [],
+    activeOpportunities: [],
+    logs: [],
+    achievements: ACHIEVEMENTS.map(a => ({ ...a })),
+    soundEnabled: true,
+    settings: {
+      animations: true,
+      particles: true,
+    },
+  };
+}
+
+function updateRanking(state: GameState): string[] {
+  const allFamilies = [
+    { id: 'player', asset: state.player.asset },
+    ...state.aiFamilies.map(ai => ({ id: ai.familyId, asset: ai.asset })),
+  ];
+  allFamilies.sort((a, b) => b.asset - a.asset);
+  return allFamilies.map(f => f.id);
+}
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME': {
-      return {
-        ...initialState,
-        familyName: action.payload.familyName,
-        gameStarted: true,
-        aiFamilies: AI_FAMILIES.map(f => ({ ...f, currentAssets: INITIAL_ASSETS + Math.random() * 20000 - 10000 })),
-      };
+      return createInitialState(action.payload.familyName);
     }
 
     case 'INVEST': {
-      const { investmentId, amount } = action.payload;
-      const cost = amount;
-      if (state.assets < cost) return state;
+      const { investmentId, amount, outcome, returnAmount } = action.payload;
+      const invIndex = state.player.investments.findIndex(i => i.investmentId === investmentId);
+      
+      let newInvestments = [...state.player.investments];
+      if (invIndex >= 0) {
+        const existing = { ...newInvestments[invIndex] };
+        existing.totalInvested += amount;
+        existing.totalReturned += returnAmount;
+        existing.experience += outcome === 'crit' ? 3 : outcome === 'normal' ? 1 : 0;
+        newInvestments[invIndex] = existing;
+      } else {
+        newInvestments.push({
+          investmentId,
+          level: 1,
+          totalInvested: amount,
+          totalReturned: returnAmount,
+          experience: outcome === 'crit' ? 3 : outcome === 'normal' ? 1 : 0,
+        });
+      }
 
-      const existing = state.investments.find(i => i.investmentId === investmentId);
-      const newInvestments = existing
-        ? state.investments.map(i =>
-            i.investmentId === investmentId
-              ? { ...i, quantity: i.quantity + 1, totalReturn: i.totalReturn }
-              : i
-          )
-        : [...state.investments, { investmentId, quantity: 1, totalReturn: 0 }];
+      const newAsset = state.player.asset + returnAmount;
+      const newCombo = outcome === 'crit' ? state.comboCount + 1 : 0;
+      const newCritEnergy = outcome === 'crit'
+        ? 0
+        : Math.min(100, state.critEnergy + 15);
 
-      return {
-        ...state,
-        assets: state.assets - cost,
+      const newPlayer = {
+        ...state.player,
+        asset: Math.max(GAME_OVER_ASSET_THRESHOLD, newAsset),
+        cashReserve: Math.max(0, state.player.cashReserve - amount + returnAmount),
         investments: newInvestments,
-        history: [
-          ...state.history,
-          { year: state.year, action: `投资`, result: investmentId, assetChange: -cost },
-        ],
+        critEnergy: newCritEnergy,
+        comboCount: newCombo,
       };
-    }
 
-    case 'NEXT_YEAR': {
-      const newYear = state.year + 1;
-      const newTurn = state.turn + 1;
-      const shouldAdvanceEra = newTurn > state.era * TURNS_PER_ERA && state.era < MAX_ERAS;
-
-      return {
+      const newState = {
         ...state,
-        year: newYear,
-        turn: newTurn,
-        era: state.era,
-        eraTransition: shouldAdvanceEra
-          ? { fromEra: state.era, toEra: state.era + 1, stage: 0 }
-          : state.eraTransition,
-        lastAssetPeak: Math.max(state.lastAssetPeak, state.assets),
+        player: newPlayer,
+        comboCount: newCombo,
+        critEnergy: newCritEnergy,
       };
+
+      return { ...newState, ranking: updateRanking(newState) };
     }
 
-    case 'APPLY_EFFECTS': {
-      const { effects } = action.payload;
-      let newAssets = state.assets;
-      let newPrestige = state.prestige;
-      effects.forEach((effect: { type: string; value: number }) => {
-        if (effect.type === 'asset') newAssets *= (1 + effect.value);
-        if (effect.type === 'prestige') newPrestige += effect.value;
+    case 'UPGRADE_INVEST': {
+      const { investmentId } = action.payload;
+      const newInvestments = state.player.investments.map(inv => {
+        if (inv.investmentId === investmentId && inv.level < 7) {
+          return { ...inv, level: inv.level + 1 };
+        }
+        return inv;
       });
       return {
         ...state,
-        assets: Math.round(newAssets),
-        prestige: Math.round(newPrestige),
+        player: { ...state.player, investments: newInvestments },
       };
     }
 
-    case 'TRIGGER_CRISIS': {
-      return {
+    case 'END_YEAR': {
+      const newTurn = state.turn + 1;
+      const yearRange = state.currentEra === 1 ? [1760, 1840]
+        : state.currentEra === 2 ? [1870, 1914]
+        : state.currentEra === 3 ? [1960, 1990]
+        : [2010, 2025];
+      const yearProgress = (newTurn - 1) / MAX_TURNS_PER_ERA;
+      const newYear = Math.floor(yearRange[0] + (yearRange[1] - yearRange[0]) * yearProgress);
+
+      const updatedAIs = simulateAIFamilies(state.aiFamilies, state.currentEra);
+
+      const newState = {
         ...state,
-        currentEvent: { type: 'crisis', data: action.payload },
+        turn: newTurn,
+        currentYear: newYear,
+        aiFamilies: updatedAIs,
+        player: {
+          ...state.player,
+          asset: state.player.asset + state.player.investments.reduce((sum, inv) => {
+            return sum + inv.totalReturned * 0.1;
+          }, 0),
+        },
       };
+
+      return { ...newState, ranking: updateRanking(newState) };
     }
 
-    case 'TRIGGER_OPPORTUNITY': {
-      return {
-        ...state,
-        currentEvent: { type: 'opportunity', data: action.payload },
-      };
+    case 'TRIGGER_EVENT': {
+      return { ...state };
+    }
+
+    case 'MARRY': {
+      return { ...state };
+    }
+
+    case 'TRAIN_HEIR': {
+      return { ...state };
     }
 
     case 'NEXT_ERA': {
-      const nextEra = state.era + 1;
+      const nextEra = (state.currentEra + 1) as Era;
+      if (nextEra > 4) {
+        return {
+          ...state,
+          gameOver: true,
+          victory: state.player.asset >= VICTORY_ASSET_TARGET,
+        };
+      }
       return {
         ...state,
-        era: nextEra,
-        prestige: state.prestige + 50,
-        history: [
-          ...state.history,
-          { year: state.year, action: '时代跨越', result: `进入第${nextEra}时代`, assetChange: 0 },
-        ],
+        currentEra: nextEra,
+        currentYear: START_YEAR_BY_ERA[nextEra],
+        turn: 1,
+        player: {
+          ...state.player,
+          asset: Math.floor(state.player.asset * 0.3),
+          cashReserve: Math.floor(state.player.cashReserve * 0.3),
+          investments: [],
+        },
+        activeCrises: [],
+        activeOpportunities: [],
       };
     }
 
-    case 'UNLOCK_ACHIEVEMENT': {
+    case 'GAME_OVER': {
       return {
         ...state,
-        achievements: state.achievements.map(a =>
-          a.id === action.payload ? { ...a, unlocked: true, unlockedAt: Date.now() } : a
-        ),
-        currentAchievement: state.achievements.find(a => a.id === action.payload) || null,
+        gameOver: true,
+        victory: action.payload.victory,
       };
     }
 
-    case 'DISMISS_EVENT': {
-      return { ...state, currentEvent: null };
+    case 'TOGGLE_SOUND': {
+      return { ...state, soundEnabled: !state.soundEnabled };
     }
 
-    case 'DISMISS_ACHIEVEMENT': {
-      return { ...state, currentAchievement: null };
+    case 'UPDATE_SETTINGS': {
+      return { ...state, settings: { ...state.settings, ...action.payload } };
     }
 
-    case 'DISMISS_ERA_TRANSITION': {
-      return { ...state, eraTransition: null };
-    }
-
-    case 'UPDATE_AI': {
+    case 'ADD_LOG': {
       return {
         ...state,
-        aiFamilies: action.payload,
-        ranking: calculateRanking(state.assets, action.payload),
+        logs: [action.payload, ...state.logs].slice(0, 20),
       };
     }
 
-    case 'LEGENDARY_INVEST': {
-      const { investmentId } = action.payload;
-      return {
-        ...state,
-        currentEvent: null,
-        investments: [...state.investments, { investmentId, quantity: 1, totalReturn: 0 }],
-      };
+    case 'LOAD_SAVE': {
+      return { ...action.payload };
     }
 
     default:
@@ -163,15 +228,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-interface GameContextType {
+interface GameContextValue {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
 }
 
-const GameContext = createContext<GameContextType | null>(null);
+const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [state, dispatch] = useReducer(gameReducer, null!, () => createInitialState('无名'));
+
   return (
     <GameContext.Provider value={{ state, dispatch }}>
       {children}
@@ -179,8 +245,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useGame() {
+export function useGameState(): GameContextValue {
   const context = useContext(GameContext);
-  if (!context) throw new Error('useGame must be used within GameProvider');
+  if (!context) {
+    throw new Error('useGameState must be used within a GameProvider');
+  }
   return context;
 }

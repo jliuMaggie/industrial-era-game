@@ -1,128 +1,179 @@
+export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+export type Era = 1 | 2 | 3 | 4;
+
+export type InvestmentType = 'industry' | 'finance' | 'technology' | 'logistics' | 'energy';
+
+export type AIStyle = 'aggressive' | 'balanced' | 'conservative' | 'opportunist';
+
+export interface InvestmentLevel {
+  level: number;
+  name: string;
+  returnRate: number;
+  critRate: number;
+  failRate: number;
+  minInvest: number;
+  maxInvest: number;
+  critMultiplierMin: number;
+  critMultiplierMax: number;
+  description: string;
+}
+
 export interface Investment {
   id: string;
   name: string;
   description: string;
-  cost: number;
-  returnRate: number;
-  riskLevel: number;
-  category: string;
-  era: number;
-  level: number;
+  type: InvestmentType;
+  rarity: Rarity;
+  era: Era;
   icon: string;
-  flavorText: string;
+  levels: InvestmentLevel[];
+  riskStars: number;
+}
+
+export interface PlayerInvestment {
+  investmentId: string;
+  level: number;
+  totalInvested: number;
+  totalReturned: number;
+  experience: number;
 }
 
 export interface Crisis {
   id: string;
   name: string;
-  year: number;
-  era: number;
   description: string;
-  narrative: string;
-  effects: Effect[];
-  icon: string;
+  era: Era;
+  assetLossPercent: number;
+  reputationLoss: number;
+  duration: number;
 }
 
 export interface Opportunity {
   id: string;
   name: string;
-  year: number;
-  era: number;
   description: string;
-  narrative: string;
-  effects: Effect[];
-  icon: string;
-}
-
-export interface Effect {
-  type: 'asset' | 'prestige' | 'investment' | 'ranking';
-  value: number;
-  description: string;
+  era: Era;
+  assetBonusPercent: number;
+  reputationBonus: number;
 }
 
 export interface AIFamily {
   id: string;
   name: string;
-  avatar: string;
-  strategy: 'aggressive' | 'conservative' | 'balanced' | 'opportunist';
-  currentAssets: number;
-  currentPrestige: number;
-  investments: string[];
+  color: string;
+  style: AIStyle;
+  baseAsset: number;
+  riskTolerance: number;
+}
+
+export interface Marriage {
+  id: string;
+  name: string;
+  title: string;
+  rarity: Rarity;
+  assetBonus: number;
+  reputationBonus: number;
+  critBonus: number;
+  description: string;
+}
+
+export interface Talent {
+  id: string;
+  name: string;
+  description: string;
+  rarity: Rarity;
+  effect: {
+    type: 'critRate' | 'returnRate' | 'riskReduce' | 'reputationGain';
+    value: number;
+  };
 }
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
-  flavorText: string;
-  icon: string;
   condition: string;
   unlocked: boolean;
-  unlockedAt?: number;
 }
 
-export interface EraTransitionText {
-  fromEra: number;
-  toEra: number;
-  title: string;
-  lines: string[];
+export interface Heir {
+  name: string;
+  age: number;
+  health: number;
+  talents: Talent[];
+}
+
+export interface FamilyState {
+  id: string;
+  name: string;
+  asset: number;
+  reputation: number;
+  cashReserve: number;
+  investments: PlayerInvestment[];
+  heir: Heir | null;
+  marriages: Marriage[];
+  critEnergy: number;
+  comboCount: number;
+}
+
+export interface AIFamilyState {
+  familyId: string;
+  name: string;
+  color: string;
+  asset: number;
+  reputation: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface GameLogEntry {
+  id: string;
+  familyName: string;
+  action: string;
+  timestamp: number;
 }
 
 export interface GameState {
-  year: number;
-  era: number;
-  familyName: string;
-  assets: number;
-  prestige: number;
-  investments: OwnedInvestment[];
-  ranking: number;
-  history: HistoryEntry[];
+  currentYear: number;
+  currentEra: Era;
   turn: number;
-  aiFamilies: AIFamily[];
+  maxTurnsPerEra: number;
+  player: FamilyState;
+  aiFamilies: AIFamilyState[];
+  ranking: string[];
+  comboCount: number;
+  critEnergy: number;
+  gameOver: boolean;
+  victory: boolean;
+  activeCrises: Crisis[];
+  activeOpportunities: Opportunity[];
+  logs: GameLogEntry[];
   achievements: Achievement[];
-  lastAssetPeak: number;
-  gameStarted: boolean;
-  currentEvent: GameEvent | null;
-  currentAchievement: Achievement | null;
-  eraTransition: EraTransitionState | null;
-}
-
-export interface OwnedInvestment {
-  investmentId: string;
-  quantity: number;
-  totalReturn: number;
-}
-
-export interface HistoryEntry {
-  year: number;
-  action: string;
-  result: string;
-  assetChange: number;
-}
-
-export interface GameEvent {
-  type: 'crisis' | 'opportunity' | 'legendary';
-  data: Crisis | Opportunity | Investment;
-}
-
-export interface EraTransitionState {
-  fromEra: number;
-  toEra: number;
-  stage: number;
+  soundEnabled: boolean;
+  settings: {
+    animations: boolean;
+    particles: boolean;
+  };
 }
 
 export type GameAction =
   | { type: 'START_GAME'; payload: { familyName: string } }
-  | { type: 'INVEST'; payload: { investmentId: string; amount: number } }
-  | { type: 'NEXT_YEAR' }
-  | { type: 'TRIGGER_CRISIS'; payload: Crisis }
-  | { type: 'TRIGGER_OPPORTUNITY'; payload: Opportunity }
-  | { type: 'APPLY_EFFECTS'; payload: { effects: Effect[]; isCrisis: boolean } }
+  | { type: 'INVEST'; payload: { investmentId: string; amount: number; outcome: 'crit' | 'normal' | 'fail'; returnAmount: number; multiplier: number } }
+  | { type: 'UPGRADE_INVEST'; payload: { investmentId: string } }
+  | { type: 'END_YEAR' }
+  | { type: 'TRIGGER_EVENT' }
+  | { type: 'MARRY'; payload: { marriageId: string } }
+  | { type: 'TRAIN_HEIR'; payload: { talentId: string; amount: number } }
   | { type: 'NEXT_ERA' }
-  | { type: 'UNLOCK_ACHIEVEMENT'; payload: string }
-  | { type: 'DISMISS_EVENT' }
-  | { type: 'DISMISS_ACHIEVEMENT' }
-  | { type: 'DISMISS_ERA_TRANSITION' }
-  | { type: 'SET_ERA_TRANSITION_STAGE'; payload: number }
-  | { type: 'LEGENDARY_INVEST'; payload: { investmentId: string } }
-  | { type: 'UPDATE_AI'; payload: AIFamily[] };
+  | { type: 'GAME_OVER'; payload: { victory: boolean } }
+  | { type: 'TOGGLE_SOUND' }
+  | { type: 'UPDATE_SETTINGS'; payload: Partial<GameState['settings']> }
+  | { type: 'ADD_LOG'; payload: GameLogEntry }
+  | { type: 'LOAD_SAVE'; payload: GameState };
+
+export interface InvestResult {
+  outcome: 'crit' | 'normal' | 'fail';
+  returnAmount: number;
+  multiplier: number;
+  message: string;
+}

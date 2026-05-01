@@ -1,86 +1,146 @@
-import { CRIT_CHANCE, CRIT_MULTIPLIER, COMBO_THRESHOLD, COMBO_MULTIPLIER } from '../data/constants';
-import { getInvestmentById } from '../data/investments';
-import type { OwnedInvestment } from '../data/types';
+import type { Investment, InvestResult, Talent } from '@/data/types';
+import {
+  BASE_CRIT_RATE,
+  COMBO_MULTIPLIERS,
+  MAX_CRIT_ENERGY,
+  CASH_RESERVE_THRESHOLD,
+  CASH_RESERVE_BONUS,
+} from '@/data/constants';
 
-export interface InvestResult {
-  baseReturn: number;
-  isCrit: boolean;
-  critMultiplier: number;
-  comboCount: number;
-  comboMultiplier: number;
-  finalReturn: number;
-  totalReturn: number;
-}
-
-let comboCounter = 0;
-let lastInvestTurn = 0;
-
-export function calculateInvest(
-  investmentId: string,
-  turn: number,
-  _quantity: number,
-  existingTotalReturn: number
+export function calculateReturn(
+  investment: Investment,
+  level: number,
+  amount: number,
+  talents: Talent[],
+  bonuses: {
+    comboCount: number;
+    critEnergy: number;
+    cashReserve: number;
+    totalAsset: number;
+    marriageCritBonus: number;
+  }
 ): InvestResult {
-  const investment = getInvestmentById(investmentId);
-  if (!investment) {
+  const invLevel = investment.levels[Math.min(level - 1, investment.levels.length - 1)];
+  
+  // Calculate crit rate from all sources
+  let totalCritRate = BASE_CRIT_RATE + invLevel.critRate;
+  
+  // Add talent bonuses
+  for (const talent of talents) {
+    if (talent.effect.type === 'critRate') {
+      totalCritRate += talent.effect.value;
+    }
+  }
+  
+  // Add marriage bonus
+  totalCritRate += bonuses.marriageCritBonus;
+  
+  // Add combo bonus
+  const comboBonus = Math.min(bonuses.comboCount * 0.02, 0.10);
+  totalCritRate += comboBonus;
+  
+  // Add energy bonus (when full, guarantee crit)
+  const energyBonus = bonuses.critEnergy >= MAX_CRIT_ENERGY ? 1.0 : 0;
+  totalCritRate += energyBonus;
+  
+  // Cap crit rate at 80%
+  totalCritRate = Math.min(totalCritRate, 0.80);
+  
+  // Roll for outcome
+  const roll = Math.random();
+  
+  // Apply talent risk reduction
+  let failRate = invLevel.failRate;
+  for (const talent of talents) {
+    if (talent.effect.type === 'riskReduce') {
+      failRate = Math.max(0, failRate - talent.effect.value);
+    }
+  }
+  
+  if (roll < failRate) {
+    // Fail
+    const lossPercent = 0.3 + Math.random() * 0.4;
+    const lossAmount = -Math.floor(amount * lossPercent);
     return {
-      baseReturn: 0, isCrit: false, critMultiplier: 1,
-      comboCount: 0, comboMultiplier: 1, finalReturn: 0, totalReturn: existingTotalReturn,
+      outcome: 'fail',
+      returnAmount: lossAmount,
+      multiplier: -lossPercent,
+      message: `投资失败！损失 £${Math.abs(lossAmount).toLocaleString()}`,
     };
   }
-
-  const baseReturn = investment.returnRate * investment.cost;
-
-  const isCrit = Math.random() < CRIT_CHANCE;
-  const critMultiplier = isCrit ? CRIT_MULTIPLIER : 1;
-
-  if (turn === lastInvestTurn + 1) {
-    comboCounter++;
-  } else {
-    comboCounter = 1;
+  
+  if (roll < failRate + totalCritRate) {
+    // Crit
+    const critMultRange = invLevel.critMultiplierMax - invLevel.critMultiplierMin;
+    let critMultiplier = invLevel.critMultiplierMin + Math.random() * critMultRange;
+    
+    // Apply combo multiplier
+    const comboIndex = Math.min(bonuses.comboCount, COMBO_MULTIPLIERS.length - 1);
+    const comboMult = COMBO_MULTIPLIERS[comboIndex];
+    critMultiplier *= comboMult;
+    
+    // Apply return rate talents
+    let returnRateBonus = 0;
+    for (const talent of talents) {
+      if (talent.effect.type === 'returnRate') {
+        returnRateBonus += talent.effect.value;
+      }
+    }
+    
+    const returnAmount = Math.floor(amount * critMultiplier * (1 + returnRateBonus));
+    
+    return {
+      outcome: 'crit',
+      returnAmount,
+      multiplier: critMultiplier,
+      message: `暴击！${comboMult}x倍率！收益 £${returnAmount.toLocaleString()}`,
+    };
   }
-  lastInvestTurn = turn;
-
-  const comboMultiplier = comboCounter >= COMBO_THRESHOLD ? COMBO_MULTIPLIER : 1;
-  const comboCount = comboCounter;
-
-  const finalReturn = baseReturn * critMultiplier * comboMultiplier;
-  const totalReturn = existingTotalReturn + finalReturn;
-
+  
+  // Normal
+  let returnRate = invLevel.returnRate;
+  for (const talent of talents) {
+    if (talent.effect.type === 'returnRate') {
+      returnRate += talent.effect.value;
+    }
+  }
+  
+  const returnAmount = Math.floor(amount * (1 + returnRate));
+  
   return {
-    baseReturn,
-    isCrit,
-    critMultiplier,
-    comboCount,
-    comboMultiplier,
-    finalReturn,
-    totalReturn,
+    outcome: 'normal',
+    returnAmount,
+    multiplier: 1 + returnRate,
+    message: `投资成功！收益 £${returnAmount.toLocaleString()}`,
   };
 }
 
-export function resetCombo() {
-  comboCounter = 0;
-  lastInvestTurn = 0;
+export function applyCashReserveBonus(
+  amount: number,
+  cashReserve: number,
+  totalAsset: number
+): number {
+  if (totalAsset <= 0) return amount;
+  const reserveRatio = cashReserve / totalAsset;
+  if (reserveRatio > CASH_RESERVE_THRESHOLD) {
+    return Math.floor(amount * (1 + CASH_RESERVE_BONUS));
+  }
+  return amount;
 }
 
-export function getComboCount(): number {
-  return comboCounter;
+export function canUpgrade(
+  investment: Investment,
+  currentLevel: number,
+  playerAsset: number
+): boolean {
+  if (currentLevel >= 7) return false;
+  const nextLevel = investment.levels[currentLevel];
+  if (!nextLevel) return false;
+  return playerAsset >= nextLevel.minInvest;
 }
 
-export function processYearEndReturns(investments: OwnedInvestment[]): { updatedInvestments: OwnedInvestment[]; totalIncome: number } {
-  let totalIncome = 0;
-  const updatedInvestments = investments.map(inv => {
-    const investment = getInvestmentById(inv.investmentId);
-    if (!investment) return inv;
-
-    const yearlyReturn = investment.returnRate * investment.cost * inv.quantity;
-    totalIncome += yearlyReturn;
-
-    return {
-      ...inv,
-      totalReturn: inv.totalReturn + yearlyReturn,
-    };
-  });
-
-  return { updatedInvestments, totalIncome };
+export function getUpgradeCost(investment: Investment, currentLevel: number): number {
+  if (currentLevel >= 7) return Infinity;
+  const nextLevel = investment.levels[currentLevel];
+  return nextLevel ? nextLevel.minInvest : Infinity;
 }
